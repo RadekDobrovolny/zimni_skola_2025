@@ -44,8 +44,8 @@ function setup() {
 
     panel = new Panel(textMessages, color("#ff101f"));
 
-    intObj = new InteractiveObj(0, "right");
-    intObj2 = new InteractiveObj(500, "left");
+    intObj = new InteractiveObj(50, "right");
+    intObj2 = new InteractiveObj(600, "left");
 
     borderLine = new Border();
 }
@@ -79,6 +79,10 @@ function draw() {
 }
 
 function mousePressed() {
+    if (getAudioContext().state !== 'running') {
+        getAudioContext().resume();
+    }
+
     intObj.checkClick(mouseX, mouseY);
     intObj2.checkClick(mouseX, mouseY);
 }
@@ -117,15 +121,23 @@ class Panel {
     
     // Aktualizuje rozměry panelu dle aktuální velikosti canvasu
     updateDimensions() {
-        this.w = width;                // panel přes celou šířku
-        this.h = height / 4;           // výška 1/4 canvasu
-        this.x = 0;
-        this.y = (height - this.h) / 2;  // vertikálně vycentrovaný
+        // Pokud je šířka canvasu menší než 600, předpokládáme, že se jedná o mobil
+        if (width < 600) {
+            this.w = width;               // panel bude o 20 % širší než canvas
+            this.x = (width - this.w) / 2;        // vycentrování panelu
+            this.h = height / 3;                // výška panelu zůstává 1/4 výšky canvasu
+        } else {
+            this.w = width;
+            this.x = 0;
+            this.h = height / 4;
+        }
+        this.y = (height - this.h) / 2;         // panel bude vertikálně vycentrovaný
     }
+    
     
     // Kontroluje, zda uplynulo 15 sekund, a v případě potřeby změní text
     update() {
-        if (millis() - this.lastUpdateTime >= 10000) {
+        if (millis() - this.lastUpdateTime >= 15000) {
             this.index1 = floor(random(this.textArray.length));
             this.index2 = floor(random(this.textArray.length));
             do {
@@ -153,16 +165,17 @@ class Panel {
         // Vykreslení textu uvnitř panelu
         fill("#d7e3ea"); // barva textu
         textAlign(CENTER, CENTER);
-        textSize(this.h * 0.15);  // text velikosti přizpůsobený výšce panelu
+        let fontSize = width < 600 ? this.h * 0.08 : this.h * 0.15;
+        textSize(fontSize);
+        textLeading(fontSize * 1.5); // případné řádkování
         textWrap(WORD);
-        // text(this.currentText, this.w / 2, this.y + this.h / 2);
         text(this.currentText, this.x, this.y, this.w, this.h);
     }
 }
   
 class Border {
     constructor() {
-      this.thickness = 130;             // Tloušťka křivky
+      this.thickness = width < 600 ? 60 : 120; // Tloušťka křivky
       this.amplitude = 0.1 * width;      // Maximální odchylka ±10 % šířky canvasu
       this.phase = 0;                  // Počáteční fázový posun
       this.speed = 0.005;              // Rychlost změny fáze (nastavit dle potřeby)
@@ -237,12 +250,26 @@ class InteractiveObj {
     
     // Vrátí náhodný obrázek z pole intImgs
     getRandomImage() {
-      return random(intImgs);
+        return random(intImgs);
     }
     
     // Vrátí náhodnou rychlost (v pixelech za snímek); upravte rozsah dle potřeby
     getRandomSpeed() {
-      return random(2, 6);
+        return random(2, 6);
+    }
+
+    // Vypočítá škálovací faktor a výsledné rozměry pro vykreslení obrázku
+    getScaledDimensions() {
+        // Maximální povolená výška obrázku: 15 % výšky canvasu
+        const maxHeight = height * .35;
+        let scaleFactor = 1;
+        if (this.img.height > maxHeight) {
+            scaleFactor = maxHeight / this.img.height;
+        }
+        return {
+            w: this.img.width * scaleFactor,
+            h: this.img.height * scaleFactor
+        };
     }
     
     // Aktualizace polohy objektu
@@ -285,7 +312,8 @@ class InteractiveObj {
     
     // Vykreslí objekt (obrázek)
     show() {
-      image(this.img, this.x, this.level);
+        const dims = this.getScaledDimensions();
+        image(this.img, this.x, this.level, dims.w, dims.h);
     }
     
     // Zkontroluje, zda bylo kliknuto na objekt; pokud ano, zastaví se a přehraje se náhodný zvuk
