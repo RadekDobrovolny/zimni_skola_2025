@@ -82,6 +82,13 @@ function mousePressed() {
     intObj2.checkClick(mouseX, mouseY);
 }
 
+function touchStarted() {
+    if (getAudioContext().state !== 'running') {
+      getAudioContext().resume();
+    }
+    return false; // zabráníme defaultnímu chování
+  }
+
 function windowResized() {
   // Při změně rozměrů okna upravíme velikost canvasu
   const copyrightDiv = document.getElementById('copyright');
