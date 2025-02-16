@@ -39,8 +39,8 @@ function setup() {
 
     panel = new Panel(textMessages, color("#ff101f"));
 
-    intObj = new InteractiveObj(50, "right");
-    intObj2 = new InteractiveObj(600, "left");
+    intObj = new InteractiveObj(height * 0.05, "right");
+    intObj2 = new InteractiveObj(height * 0.6, "left");
 
     borderLine = new Border();
 }
@@ -250,7 +250,7 @@ class InteractiveObj {
     
     // Vrátí náhodnou rychlost (v pixelech za snímek); upravte rozsah dle potřeby
     getRandomSpeed() {
-        return random(2, 6);
+        return width < 600 ? random(1, 2) : random(2, 6);
     }
 
     // Vypočítá škálovací faktor a výsledné rozměry pro vykreslení obrázku
