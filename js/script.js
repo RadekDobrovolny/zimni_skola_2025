@@ -1,7 +1,4 @@
 let canvas;
-let button;       // instance tlačítka
-let buttonImg;    // obrázek, který se zobrazí uprostřed tlačítka
-let buttonSound;  // zvuk, který se přehraje při stisknutí obrázku
 
 let myFont;
 let bgImg;
@@ -14,8 +11,6 @@ let intSounds = [];
 
 
 function preload() {
-  buttonImg = loadImage('assets/09_baguette.png');
-  buttonSound = loadSound('assets/coin.wav');
   font = loadFont('assets/fonts/font.otf');
   bgImg = loadImage('assets/images/background.jpg');
   textMessages = loadStrings('assets/texts/texts.txt');
@@ -129,7 +124,7 @@ class Panel {
         } else {
             this.w = width;
             this.x = 0;
-            this.h = height / 4;
+            this.h = height / 3.5;
         }
         this.y = (height - this.h) / 2;         // panel bude vertikálně vycentrovaný
     }
@@ -165,7 +160,7 @@ class Panel {
         // Vykreslení textu uvnitř panelu
         fill("#d7e3ea"); // barva textu
         textAlign(CENTER, CENTER);
-        let fontSize = width < 600 ? this.h * 0.08 : this.h * 0.15;
+        let fontSize = width < 600 ? this.h * 0.08 : this.h * 0.13;
         textSize(fontSize);
         textLeading(fontSize * 1.5); // případné řádkování
         textWrap(WORD);
