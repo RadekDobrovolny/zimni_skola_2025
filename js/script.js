@@ -83,11 +83,21 @@ function mousePressed() {
 }
 
 function touchStarted() {
+    // Obnovíme AudioContext, pokud ještě neběží
     if (getAudioContext().state !== 'running') {
-        getAudioContext().resume();
+      getAudioContext().resume();
     }
-    return false; // zabráníme defaultnímu chování
-}
+  
+    // Použijeme první dotyk v poli touches
+    if (touches.length > 0) {
+      let tx = touches[0].x;
+      let ty = touches[0].y;
+      intObj.checkClick(tx, ty);
+      intObj2.checkClick(tx, ty);
+    }
+    
+    return false; // zabráníme defaultnímu chování (scrollování apod.)
+  }
 
 function windowResized() {
   // Při změně rozměrů okna upravíme velikost canvasu
