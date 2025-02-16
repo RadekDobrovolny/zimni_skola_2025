@@ -67,11 +67,11 @@ function draw() {
     panel.show();
 
     intObj.update();
-    intObj.checkCollision(borderLine); // kontrola kolize s Border
+    intObj.checkCollision(); // kontrola kolize s Border
     intObj.show();
 
     intObj2.update();
-    intObj2.checkCollision(borderLine); // kontrola kolize s Border
+    intObj2.checkCollision(); // kontrola kolize s Border
     intObj2.show();
 
     borderLine.update();
@@ -194,7 +194,7 @@ class Border {
       blendMode(DIFFERENCE);
       
       // Vykreslíme křivku
-      stroke(255);             // Bílá barva při DIFFERENCE režimu invertuje barvy podkladu
+      stroke("#00FF00");             // Bílá barva při DIFFERENCE režimu invertuje barvy podkladu
       strokeWeight(this.thickness);
       noFill();
       
@@ -335,26 +335,18 @@ class InteractiveObj {
         }
       }
     
-    /**
-     * Zkontroluje kolizi s objektem Border.
-     * Pro jednoduchost se zde detekuje kolize, když je střed objektu (x) blízko středu canvasu.
-     * Pokud dojde ke kolizi (a ještě nedošlo k výměně obrázku v tomto průjezdu),
-     * změní se obrázek na nový náhodný.
-     *
-     * @param {Border} border - Instance objektu Border.
-     */
-    checkCollision(border) {
-      // Vypočítáme střed objektu
-      let objCenterX = this.x + this.img.width / 2;
-      
-      // Pro jednoduchost použijeme střed canvasu jako referenci.
-      // Pokud je rozdíl menší než zvolený threshold a kolize ještě neproběhla,
-      // provedeme změnu obrázku.
-      let threshold = 20;
-      if (!this.collided && abs(objCenterX - width / 2) < threshold) {
-        this.img = this.getRandomImage();
-        this.collided = true;
-      }
+    checkCollision() {
+        // Použijeme škálované rozměry, pokud máte metodu getScaledDimensions() nebo getDrawWidth()
+        const dims = this.getScaledDimensions();
+        let objCenterX = this.x + dims.w / 2;
+        
+        if (!this.collided) {
+          // Pokud se objekt pohybuje doprava a jeho střed je za středem canvasu,
+          // nebo se pohybuje doleva a jeho střed je před středem canvasu:
+            if ((this.speed > 0 && objCenterX >= width / 2) || (this.speed < 0 && objCenterX <= width / 2)) {
+                this.img = this.getRandomImage();
+                this.collided = true;
+            }
+        }
     }
 }
-  
