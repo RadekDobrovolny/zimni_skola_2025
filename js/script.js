@@ -43,6 +43,7 @@ function setup() {
     intObj2 = new InteractiveObj(height * 0.6, "left");
 
     borderLine = new Border();
+    getAudioContext().resume();
 }
 
 function draw() {
@@ -73,6 +74,20 @@ function draw() {
     borderLine.show();
 }
 
+function resumeAudioContext() {
+    let ac = getAudioContext();
+    if (ac.state !== 'running') {
+        ac.resume().then(() => {
+            console.log("AudioContext byl obnoven.");
+        }).catch((e) => {
+            console.error("Obnovení AudioContext selhalo: ", e);
+        });
+    }
+}
+
+document.addEventListener("touchstart", resumeAudioContext, { once: true });
+document.addEventListener("click", resumeAudioContext, { once: true });
+
 function mousePressed() {
     if (getAudioContext().state !== 'running') {
         getAudioContext().resume();
@@ -84,10 +99,10 @@ function mousePressed() {
 
 function touchStarted() {
     if (getAudioContext().state !== 'running') {
-      getAudioContext().resume();
+        getAudioContext().resume();
     }
     return false; // zabráníme defaultnímu chování
-  }
+}
 
 function windowResized() {
   // Při změně rozměrů okna upravíme velikost canvasu
