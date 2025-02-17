@@ -21,7 +21,7 @@ function preload() {
     intImgs.push(loadImage('assets/images/' + name));
   }
   
-  let sndNames = ["asmr.m4a", "caj.m4a", "cinky.m4a", "cvernovka.m4a", "dvere.m4a", "fixka.m4a", "fukar.m4a", "lednicka.m4a", "slova.m4a", "spacak.m4a", "spacak2.m4a", "sprcha.m4a", "stolicky.m4a", "timi1.m4a", "timi2.m4a", "timi3.m4a", "vlajka.m4a", "vytah.m4a"];
+  let sndNames = ["asmr.ogg", "caj.ogg", "cinky.ogg", "cvernovka.ogg", "dvere.ogg", "fixka.ogg", "fukar.ogg", "lednicka.ogg", "slova.ogg", "spacak.ogg", "spacak2.ogg", "sprcha.ogg", "stolicky.ogg", "timi1.ogg", "timi2.ogg", "timi3.ogg", "vlajka.ogg", "vytah.ogg"];
   for (let name of sndNames) {
     intSounds.push(loadSound('assets/sounds/' + name));
   }
