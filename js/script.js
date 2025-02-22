@@ -1,3 +1,4 @@
+let audioContext;
 let canvas;
 
 let myFont;
@@ -6,9 +7,26 @@ let bgImg;
 let panel;
 let textMessages;
 
-let intImgs = [];
-let intSounds = [];
+const imgNames = ["ak.png", "hrib.png", "huba.png", "ihrisko.png", 
+  "kabinet.png", "kino.png", "konev.png", "kytka1.png", "kytka2.png", 
+  "kytka3.png", "meta.png", "nfjct.png", "pan.png", "slepy.png", 
+  "sprcha.png", "vetrak.png", "zachod.png", "zidle.png"];
+  
+const sndNames = [
+  "asmr.aac", "caj.aac", "cinky.aac", "cvernovka.aac", "dvere.aac",
+  "fixka.aac", "fukar.aac", "lednicka.aac", "slova.aac", "spacak.aac",
+  "spacak2.aac", "sprcha.aac", "stolicky.aac", "timi1.aac", "timi2.aac",
+  "timi3.aac", "vlajka.aac", "vytah.aac"
+];
 
+document.addEventListener('click', () => {
+  // Jednorázový listener pro "odemknutí" zvuků
+  // Můžete zde třeba vytvořit prázdný audio objekt a spustit ho na 0 hlasitost
+  const unlockAudio = new Audio();
+  unlockAudio.play().catch(() => {});
+}, { once: true });
+
+let intImgs = [];
 
 function preload() {
   font = loadFont('assets/fonts/font.otf');
@@ -16,20 +34,16 @@ function preload() {
   textMessages = loadStrings('assets/texts/texts.txt');
   conjs = loadStrings('assets/texts/conjs.txt');
 
-  let imgNames = ["ak.png", "hrib.png", "huba.png", "ihrisko.png", "kabinet.png", "kino.png", "konev.png", "kytka1.png", "kytka2.png", "kytka3.png", "meta.png", "nfjct.png", "pan.png", "slepy.png", "sprcha.png", "vetrak.png", "zachod.png", "zidle.png"];
   for (let name of imgNames) {
     intImgs.push(loadImage('assets/images/' + name));
-  }
-  
-  let sndNames = ["asmr.aac", "caj.aac", "cinky.aac", "cvernovka.aac", "dvere.aac", "fixka.aac", "fukar.aac", "lednicka.aac", "slova.aac", "spacak.aac", "spacak2.aac", "sprcha.aac", "stolicky.aac", "timi1.aac", "timi2.aac", "timi3.aac", "vlajka.aac", "vytah.aac"];
-  for (let name of sndNames) {
-    intSounds.push(loadSound('assets/sounds/' + name));
   }
 }
 
 function setup() {
     const copyrightDiv = document.getElementById('copyright');
     const copyrightHeight = copyrightDiv.offsetHeight;
+
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
   
     canvas = createCanvas(windowWidth, windowHeight - copyrightHeight);
     canvas.position(0, 0);
@@ -74,30 +88,17 @@ function draw() {
 }
 
 function mousePressed() {
-    if (getAudioContext().state !== 'running') {
-        getAudioContext().resume();
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume().then(() => {
+        intObj.checkClick(mouseX, mouseY);
+        intObj2.checkClick(mouseX, mouseY);
+      });
+      return;
     }
 
     intObj.checkClick(mouseX, mouseY);
     intObj2.checkClick(mouseX, mouseY);
 }
-
-function touchStarted() {
-    // Obnovíme AudioContext, pokud ještě neběží
-    if (getAudioContext().state !== 'running') {
-      getAudioContext().resume();
-    }
-  
-    // Použijeme první dotyk v poli touches
-    if (touches.length > 0) {
-      let tx = touches[0].x;
-      let ty = touches[0].y;
-      intObj.checkClick(tx, ty);
-      intObj2.checkClick(tx, ty);
-    }
-    
-    return false; // zabráníme defaultnímu chování (scrollování apod.)
-  }
 
 function windowResized() {
   // Při změně rozměrů okna upravíme velikost canvasu
@@ -332,20 +333,23 @@ class InteractiveObj {
     checkClick(mx, my) {
         // Předpokládáme obdélníkovou oblast obrázku
         if (
-          mx >= this.x && mx <= this.x + this.img.width &&
-          my >= this.level && my <= this.level + this.img.height
+            mx >= this.x && mx <= this.x + this.img.width &&
+            my >= this.level && my <= this.level + this.img.height
         ) {
-          if (this.moving) {  // pouze pokud je objekt právě v pohybu
-            this.moving = false;
-            let snd = random(intSounds);
-            snd.play();
-            // Po skončení zvuku se pohyb opět spustí
-            snd.onended(() => {
-              this.moving = true;
-            });
-          }
+            if (this.moving) {  // pouze pokud je objekt právě v pohybu
+                this.moving = false;
+
+                let randomSound = sndNames[Math.floor(Math.random() * sndNames.length)];
+                this.currentAudio = new Audio('assets/sounds/' + randomSound);
+                this.currentAudio.play();
+
+                this.currentAudio.addEventListener('ended', () => {
+                    this.moving = true;
+                    this.currentAudio = null; // uvolníme referenci
+                });
+            }
         }
-      }
+    }
     
     checkCollision() {
         // Použijeme škálované rozměry, pokud máte metodu getScaledDimensions() nebo getDrawWidth()
